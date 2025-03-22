@@ -1,4 +1,3 @@
-
 import streamlit as st
 import numpy as np
 import joblib
@@ -22,8 +21,8 @@ with col1:
 with col2:
     pv_views = st.number_input("PV再生数（放送前）", min_value=0)
     sns_posts = st.number_input("SNS話題数（放送前）", min_value=0)
-    dist_score = st.slider("配信到達スコア（例：配信なし=0.0, FOD独占=0.8, 複数=1.5）", 0.0, 2.0, 1.0)
-    tv_score = st.slider("放送局カバー係数（例：TV放送なし=0.0, 深夜=1.0, 全国ゴールデン=2.0）", 0.0, 2.0, 1.0)
+    dist_score = st.slider("配信到達スコア（配信なし=0.0, FOD独占=0.5, dアニメ単独=0.8, Netflix=1.7, 最大=2.0）", 0.0, 2.0, 1.0)
+    tv_score = st.slider("放送局カバー係数（TVなし=0.0, ローカル深夜=0.5, 関東ローカル=1.0, 全国ゴールデン=2.0）", 0.0, 2.0, 1.0)
 
 try:
     model = joblib.load("anime_y0_model.joblib")
@@ -38,7 +37,11 @@ try:
         "放送局カバー係数": tv_score
     }])
 
-    pred = int(model.predict(X)[0])
+    if dist_score == 0.0 and tv_score == 0.0:
+        pred = 0  # 配信も放送もないなら視聴者ゼロ
+    else:
+        pred = int(model.predict(X)[0])
+
     st.success(f"### 推定視聴者数：{pred:,}人")
 
 except Exception as e:

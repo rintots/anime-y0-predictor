@@ -41,8 +41,9 @@ try:
         pred = 0  # 配信も放送もないなら視聴者ゼロ
     else:
         raw_pred = model.predict(X)[0]
-        max_possible_viewers = dist_score * 1_000_000  # スコア1.0で最大100万人視聴可能とする仮定
-        pred = int(min(raw_pred, max_possible_viewers))
+        max_possible_viewers = (dist_score + tv_score) * 1_000_000  # 合算視聴上限に変更
+        min_viewers = 10_000  # 最小保証（SNSなど経由の話題視聴層）
+        pred = int(max(min_viewers, min(raw_pred, max_possible_viewers)))
 
     st.success(f"### 推定視聴者数：{pred:,}人")
 
